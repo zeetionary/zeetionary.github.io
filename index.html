@@ -458,6 +458,156 @@
         transform: none;
       }
 
+      /* ── Screenshots Slider ── */
+      .screenshots-section {
+        overflow: visible;
+      }
+
+      .slider-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2.5rem;
+      }
+
+      /* Ambient glow */
+      .ambient-bg {
+        position: absolute;
+        width: 340px;
+        height: 600px;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.35;
+        pointer-events: none;
+        transition: background 1s ease;
+        z-index: 0;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .slider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        min-height: 620px;
+      }
+
+      .slide {
+        flex-shrink: 0;
+        transition:
+          transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+          opacity 0.5s ease,
+          filter 0.5s ease;
+        opacity: 0.3;
+        transform: scale(0.82);
+        filter: blur(1px);
+        cursor: pointer;
+      }
+      .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        filter: none;
+      }
+      .slide.adjacent {
+        opacity: 0.55;
+        transform: scale(0.88);
+        filter: blur(0.5px);
+      }
+
+      .phone-frame {
+        width: 240px;
+        height: 520px;
+        border-radius: 36px;
+        background: var(--ink);
+        padding: 10px;
+        box-shadow:
+          0 30px 80px rgba(0, 0, 0, 0.22),
+          0 0 0 1.5px rgba(255, 255, 255, 0.07) inset;
+        position: relative;
+        overflow: hidden;
+      }
+      .phone-frame::before {
+        content: "";
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        z-index: 2;
+      }
+
+      .screen-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 28px;
+        display: block;
+      }
+
+      .slider-controls {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        z-index: 1;
+      }
+
+      .slider-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(26, 22, 18, 0.18);
+        background: var(--bg);
+        color: var(--ink);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.25s,
+          border-color 0.25s,
+          transform 0.2s;
+      }
+      .slider-btn:hover {
+        background: var(--ink);
+        color: var(--bg);
+        transform: scale(1.08);
+      }
+      .slider-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .slider-dots {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--muted);
+        opacity: 0.35;
+        transition:
+          opacity 0.3s,
+          transform 0.3s,
+          background 0.3s;
+        cursor: pointer;
+      }
+      .dot.active {
+        opacity: 1;
+        transform: scale(1.3);
+        background: var(--accent);
+      }
+
       /* ── Responsive ── */
       @media (max-width: 600px) {
         nav {
@@ -608,6 +758,88 @@
       </div>
     </section>
 
+    <!-- Screenshots -->
+    <section class="section screenshots-section" id="screenshots">
+      <p class="section-label reveal">App Screenshots</p>
+      <h2 class="section-title reveal">See it in action.</h2>
+
+      <div class="slider-wrapper reveal">
+        <!-- Ambient glow behind active slide -->
+        <div class="ambient-bg" id="ambientBg"></div>
+
+        <div class="slider" id="slider">
+          <div class="slide" data-index="0">
+            <div class="phone-frame">
+              <img
+                src="screen1.png"
+                alt="Screenshot 1"
+                class="screen-img"
+                id="img0"
+                crossorigin="anonymous"
+              />
+            </div>
+          </div>
+          <div class="slide" data-index="1">
+            <div class="phone-frame">
+              <img
+                src="screen2.png"
+                alt="Screenshot 2"
+                class="screen-img"
+                id="img1"
+                crossorigin="anonymous"
+              />
+            </div>
+          </div>
+          <div class="slide" data-index="2">
+            <div class="phone-frame">
+              <img
+                src="screen3.png"
+                alt="Screenshot 3"
+                class="screen-img"
+                id="img2"
+                crossorigin="anonymous"
+              />
+            </div>
+          </div>
+          <div class="slide" data-index="3">
+            <div class="phone-frame">
+              <img
+                src="screen4.png"
+                alt="Screenshot 4"
+                class="screen-img"
+                id="img3"
+                crossorigin="anonymous"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="slider-controls">
+          <button class="slider-btn" id="prevBtn" aria-label="Previous">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <div class="slider-dots" id="sliderDots"></div>
+          <button class="slider-btn" id="nextBtn" aria-label="Next">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="cta-section" id="download">
       <p class="section-label reveal">Get the app</p>
@@ -649,6 +881,111 @@
       window.addEventListener("scroll", () => {
         nav.classList.toggle("scrolled", window.scrollY > 40);
       });
+
+      // Screenshot slider
+      (function () {
+        const slides = Array.from(document.querySelectorAll(".slide"));
+        const dotsContainer = document.getElementById("sliderDots");
+        const ambient = document.getElementById("ambientBg");
+        let current = 0;
+
+        // Build dots
+        slides.forEach((_, i) => {
+          const d = document.createElement("div");
+          d.className = "dot" + (i === 0 ? " active" : "");
+          d.addEventListener("click", () => goTo(i));
+          dotsContainer.appendChild(d);
+        });
+
+        function getAvgColor(img) {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = 10;
+            canvas.height = 10;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, 10, 10);
+            const d = ctx.getImageData(0, 0, 10, 10).data;
+            let r = 0,
+              g = 0,
+              b = 0,
+              n = d.length / 4;
+            for (let i = 0; i < d.length; i += 4) {
+              r += d[i];
+              g += d[i + 1];
+              b += d[i + 2];
+            }
+            return `rgb(${~~(r / n)},${~~(g / n)},${~~(b / n)})`;
+          } catch (e) {
+            return "#c0622a";
+          }
+        }
+
+        function updateAmbient(idx) {
+          const img = document.getElementById("img" + idx);
+          if (img && img.complete && img.naturalWidth) {
+            ambient.style.background = getAvgColor(img);
+          }
+          img &&
+            img.addEventListener(
+              "load",
+              () => {
+                ambient.style.background = getAvgColor(img);
+              },
+              { once: true },
+            );
+        }
+
+        function goTo(idx) {
+          slides[current].classList.remove("active", "adjacent");
+          document.querySelectorAll(".dot")[current].classList.remove("active");
+          current = (idx + slides.length) % slides.length;
+          slides.forEach((s, i) => {
+            s.classList.remove("active", "adjacent");
+            if (i === current) s.classList.add("active");
+            else if (
+              i === (current - 1 + slides.length) % slides.length ||
+              i === (current + 1) % slides.length
+            )
+              s.classList.add("adjacent");
+          });
+          document.querySelectorAll(".dot")[current].classList.add("active");
+          updateAmbient(current);
+        }
+
+        document
+          .getElementById("prevBtn")
+          .addEventListener("click", () => goTo(current - 1));
+        document
+          .getElementById("nextBtn")
+          .addEventListener("click", () => goTo(current + 1));
+        slides.forEach((s, i) =>
+          s.addEventListener("click", () => {
+            if (i !== current) goTo(i);
+          }),
+        );
+
+        // Touch swipe
+        let tx = 0;
+        const slider = document.getElementById("slider");
+        slider.addEventListener(
+          "touchstart",
+          (e) => (tx = e.touches[0].clientX),
+          { passive: true },
+        );
+        slider.addEventListener("touchend", (e) => {
+          const diff = tx - e.changedTouches[0].clientX;
+          if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
+        });
+
+        // Auto-advance
+        let timer = setInterval(() => goTo(current + 1), 4000);
+        slider.addEventListener("mouseenter", () => clearInterval(timer));
+        slider.addEventListener("mouseleave", () => {
+          timer = setInterval(() => goTo(current + 1), 4000);
+        });
+
+        goTo(0);
+      })();
 
       // Scroll reveal
       const reveals = document.querySelectorAll(".reveal");
