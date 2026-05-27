@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zeetionary – Kurdish English Dictionary</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #f5f0e8;
+        --ink: #1a1612;
+        --accent: #c0622a;
+        --accent2: #4a7c6f;
+        --muted: #8a7f72;
+        --card: #ede8de;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "DM Sans", sans-serif;
+        font-weight: 300;
+        overflow-x: hidden;
+      }
+
+      /* ── Noise texture overlay ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 999;
+        opacity: 0.6;
+      }
+
+      /* ── Nav ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.4rem 2.5rem;
+        z-index: 100;
+        background: transparent;
+        transition: background 0.4s;
+      }
+      nav.scrolled {
+        background: rgba(245, 240, 232, 0.92);
+        backdrop-filter: blur(8px);
+      }
+      .nav-logo {
+        font-family: "Playfair Display", serif;
+        font-size: 1.35rem;
+        color: var(--ink);
+        letter-spacing: 0.02em;
+      }
+      .nav-logo span {
+        color: var(--accent);
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 0.88rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        transition: color 0.3s;
+      }
+      .nav-links a:hover {
+        color: var(--accent);
+      }
+
+      /* ── Hero ── */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 6rem 2rem 4rem;
+        position: relative;
+      }
+
+      .hero-eyebrow {
+        font-size: 0.78rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--accent2);
+        margin-bottom: 1.5rem;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.2s forwards;
+      }
+
+      .hero-title {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(3.5rem, 9vw, 7.5rem);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        opacity: 0;
+        animation: fadeUp 0.8s 0.4s forwards;
+      }
+      .hero-title em {
+        font-style: italic;
+        color: var(--accent);
+      }
+
+      .hero-sub {
+        margin-top: 1.6rem;
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        color: var(--muted);
+        max-width: 480px;
+        line-height: 1.7;
+        opacity: 0;
+        animation: fadeUp 0.8s 0.6s forwards;
+      }
+
+      .hero-langs {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 2rem;
+        opacity: 0;
+        animation: fadeUp 0.8s 0.75s forwards;
+      }
+      .lang-tag {
+        border: 1.5px solid var(--accent2);
+        color: var(--accent2);
+        padding: 0.3rem 0.9rem;
+        border-radius: 100px;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+      }
+
+      .hero-cta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 3rem;
+        opacity: 0;
+        animation: fadeUp 0.8s 0.9s forwards;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.85rem 1.8rem;
+        border-radius: 6px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.03em;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          transform 0.25s,
+          box-shadow 0.25s;
+        border: none;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-dark {
+        background: var(--ink);
+        color: var(--bg);
+      }
+      .btn-outline {
+        background: transparent;
+        color: var(--ink);
+        border: 1.5px solid var(--ink);
+      }
+      .btn-soon {
+        opacity: 0.45;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      .btn svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+
+      /* ── Scroll indicator ── */
+      .scroll-hint {
+        position: absolute;
+        bottom: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--muted);
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0;
+        animation: fadeIn 1s 1.8s forwards;
+      }
+      .scroll-line {
+        width: 1px;
+        height: 50px;
+        background: var(--muted);
+        animation: scrollLine 1.8s 2s infinite;
+        transform-origin: top;
+      }
+      @keyframes scrollLine {
+        0% {
+          transform: scaleY(0);
+          opacity: 0;
+        }
+        40% {
+          transform: scaleY(1);
+          opacity: 1;
+        }
+        100% {
+          transform: scaleY(1);
+          opacity: 0;
+        }
+      }
+
+      /* ── Decorative letters ── */
+      .deco-letter {
+        position: absolute;
+        font-family: "Playfair Display", serif;
+        font-size: clamp(8rem, 18vw, 16rem);
+        font-weight: 700;
+        opacity: 0.04;
+        user-select: none;
+        pointer-events: none;
+        line-height: 1;
+      }
+      .deco-left {
+        left: -2vw;
+        top: 20%;
+        color: var(--accent);
+      }
+      .deco-right {
+        right: -2vw;
+        bottom: 15%;
+        color: var(--accent2);
+      }
+
+      /* ── Features ── */
+      .section {
+        padding: 6rem 2rem;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .section-label {
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1rem;
+      }
+      .section-title {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1.2;
+        margin-bottom: 3.5rem;
+        max-width: 520px;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5px;
+        background: rgba(26, 22, 18, 0.1);
+        border: 1.5px solid rgba(26, 22, 18, 0.1);
+      }
+
+      .feature-card {
+        background: var(--bg);
+        padding: 2.5rem 2rem;
+        transition: background 0.3s;
+      }
+      .feature-card:hover {
+        background: var(--card);
+      }
+
+      .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 1.2rem;
+        display: block;
+      }
+      .feature-name {
+        font-family: "Playfair Display", serif;
+        font-size: 1.25rem;
+        margin-bottom: 0.6rem;
+      }
+      .feature-desc {
+        font-size: 0.9rem;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      /* ── Demo word ── */
+      .demo-section {
+        background: var(--ink);
+        color: var(--bg);
+        padding: 5rem 2rem;
+      }
+      .demo-inner {
+        max-width: 700px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .demo-label {
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1.5rem;
+      }
+      .demo-word {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        letter-spacing: -0.01em;
+        position: relative;
+        display: inline-block;
+      }
+      .demo-word::after {
+        content: "";
+        position: absolute;
+        bottom: 4px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        animation: underlineIn 0.8s 1.5s forwards;
+      }
+      @keyframes underlineIn {
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      .demo-phonetic {
+        color: var(--accent2);
+        font-size: 1rem;
+        margin: 0.6rem 0 1.5rem;
+        letter-spacing: 0.05em;
+      }
+      .demo-translation {
+        font-size: 1.5rem;
+        font-family: "Playfair Display", serif;
+        color: rgba(245, 240, 232, 0.7);
+        font-style: italic;
+      }
+      .demo-note {
+        margin-top: 2.5rem;
+        font-size: 0.82rem;
+        color: rgba(245, 240, 232, 0.3);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      /* ── CTA section ── */
+      .cta-section {
+        padding: 7rem 2rem;
+        text-align: center;
+      }
+      .cta-section .section-title {
+        max-width: 600px;
+        margin: 0 auto 1rem;
+      }
+      .cta-section .hero-sub {
+        margin: 0 auto 2.5rem;
+        opacity: 1;
+        animation: none;
+      }
+      .cta-section .hero-cta {
+        opacity: 1;
+        animation: none;
+      }
+
+      /* ── Footer ── */
+      footer {
+        border-top: 1.5px solid rgba(26, 22, 18, 0.1);
+        padding: 2rem 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .footer-logo {
+        font-family: "Playfair Display", serif;
+        font-size: 1.1rem;
+      }
+      .footer-logo span {
+        color: var(--accent);
+      }
+      .footer-copy {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      /* ── Animations ── */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(22px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Scroll reveal */
+      .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition:
+          opacity 0.75s ease,
+          transform 0.75s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* ── Responsive ── */
+      @media (max-width: 600px) {
+        nav {
+          padding: 1.2rem 1.2rem;
+        }
+        .nav-links {
+          display: none;
+        }
+        footer {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Nav -->
+    <nav id="nav">
+      <div class="nav-logo">Zee<span>tionary</span></div>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#download">Download</a></li>
+      </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="deco-letter deco-left">ک</div>
+      <div class="deco-letter deco-right">Z</div>
+
+      <p class="hero-eyebrow">Now Available</p>
+      <h1 class="hero-title">Zee<em>tionary</em></h1>
+      <p class="hero-sub">
+        The definitive Kurdish–English dictionary. Thousands of words, right in
+        your pocket.
+      </p>
+
+      <div class="hero-langs">
+        <span class="lang-tag">Kurdish</span>
+        <span class="lang-tag">English</span>
+        <span class="lang-tag">کوردی</span>
+      </div>
+
+      <div class="hero-cta">
+        <a href="#" class="btn btn-dark btn-soon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+            />
+          </svg>
+          App Store
+        </a>
+        <a href="#" class="btn btn-outline btn-soon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3.18 23.76c.3.17.65.19.97.07l11.46-6.63-2.46-2.46-9.97 9zM.4 1.09A1.03 1.03 0 000 1.9v20.2c0 .32.14.6.4.8l.1.08 11.3-11.3v-.27L.5 1zM19.43 9.23l-2.6-1.5-2.77 2.77 2.77 2.77 2.62-1.51c.75-.43.75-1.1-.02-1.53zM3.18.24L14.64 6.87l-2.46 2.46L2.22.77c.29-.13.64-.12.96-.53z"
+            />
+          </svg>
+          Google Play
+        </a>
+      </div>
+      <p
+        style="
+          margin-top: 1rem;
+          font-size: 0.75rem;
+          color: var(--muted);
+          letter-spacing: 0.06em;
+          opacity: 0;
+          animation: fadeIn 1s 1.2s forwards;
+        "
+      >
+        Coming soon to both stores
+      </p>
+
+      <div class="scroll-hint">
+        <div class="scroll-line"></div>
+        <span>Scroll</span>
+      </div>
+    </section>
+
+    <!-- Demo word -->
+    <div class="demo-section">
+      <div class="demo-inner">
+        <p class="demo-label">Sample Entry</p>
+        <p class="demo-word">Azadî</p>
+        <p class="demo-phonetic">/ a·za·dî /</p>
+        <p class="demo-translation">Freedom · آزادی</p>
+        <p class="demo-note">
+          Kurdish → English · Thousands of entries like this
+        </p>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <section class="section" id="features">
+      <p class="section-label reveal">What's inside</p>
+      <h2 class="section-title reveal">
+        Everything you need to bridge two languages.
+      </h2>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <span class="feature-icon">📖</span>
+          <h3 class="feature-name">Rich Dictionary</h3>
+          <p class="feature-desc">
+            Thousands of Kurdish–English word entries with definitions,
+            examples, and context.
+          </p>
+        </div>
+        <div class="feature-card reveal">
+          <span class="feature-icon">🔍</span>
+          <h3 class="feature-name">Instant Search</h3>
+          <p class="feature-desc">
+            Find any word in milliseconds. Search in Kurdish or English, however
+            you think.
+          </p>
+        </div>
+        <div class="feature-card reveal">
+          <span class="feature-icon">📵</span>
+          <h3 class="feature-name">Offline First</h3>
+          <p class="feature-desc">
+            No internet? No problem. The full dictionary works completely
+            offline.
+          </p>
+        </div>
+        <div class="feature-card reveal">
+          <span class="feature-icon">🔤</span>
+          <h3 class="feature-name">Kurdish Script</h3>
+          <p class="feature-desc">
+            Full support for Kurdish script and Latin transliteration side by
+            side.
+          </p>
+        </div>
+        <div class="feature-card reveal">
+          <span class="feature-icon">⭐</span>
+          <h3 class="feature-name">Favourites</h3>
+          <p class="feature-desc">
+            Save and revisit words you're learning. Build your personal
+            vocabulary list.
+          </p>
+        </div>
+        <div class="feature-card reveal">
+          <span class="feature-icon">🌙</span>
+          <h3 class="feature-name">Dark Mode</h3>
+          <p class="feature-desc">
+            Easy on the eyes day or night with a carefully designed dark theme.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="download">
+      <p class="section-label reveal">Get the app</p>
+      <h2 class="section-title reveal">
+        Your Kurdish–English companion, always with you.
+      </h2>
+      <p class="hero-sub reveal">
+        Available soon on iOS and Android. Free to download.
+      </p>
+      <div class="hero-cta reveal">
+        <a href="#" class="btn btn-dark btn-soon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+            />
+          </svg>
+          App Store
+        </a>
+        <a href="#" class="btn btn-outline btn-soon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3.18 23.76c.3.17.65.19.97.07l11.46-6.63-2.46-2.46-9.97 9zM.4 1.09A1.03 1.03 0 000 1.9v20.2c0 .32.14.6.4.8l.1.08 11.3-11.3v-.27L.5 1zM19.43 9.23l-2.6-1.5-2.77 2.77 2.77 2.77 2.62-1.51c.75-.43.75-1.1-.02-1.53zM3.18.24L14.64 6.87l-2.46 2.46L2.22.77c.29-.13.64-.12.96-.53z"
+            />
+          </svg>
+          Google Play
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-logo">Zee<span>tionary</span></div>
+      <p class="footer-copy">© 2025 Zeetionary. Kurdish–English Dictionary.</p>
+    </footer>
+
+    <script>
+      // Nav scroll effect
+      const nav = document.getElementById("nav");
+      window.addEventListener("scroll", () => {
+        nav.classList.toggle("scrolled", window.scrollY > 40);
+      });
+
+      // Scroll reveal
+      const reveals = document.querySelectorAll(".reveal");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+              setTimeout(() => e.target.classList.add("visible"), i * 80);
+              observer.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12 },
+      );
+      reveals.forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>
