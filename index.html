@@ -606,6 +606,8 @@
       }
       .reviews-track-outer {
         overflow: hidden;
+        display: flex;
+        justify-content: center;
       }
       .reviews-track {
         display: flex;
@@ -743,7 +745,8 @@
           text-align: center;
         }
         .review-card {
-          flex: 0 0 260px;
+          flex: 0 0 calc(100vw - 4rem);
+          max-width: calc(100vw - 4rem);
         }
       }
     </style>
