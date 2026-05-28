@@ -1364,9 +1364,7 @@
               }
               location.reload();
             } catch (e) {
-              alert(
-                "Submission failed: Make sure your email/pass are correct and your rules allow the update.",
-              );
+              alert("Submission failed...");
             }
           });
 
@@ -1470,55 +1468,6 @@
           .addEventListener("input", function () {
             document.getElementById("charCount").textContent =
               this.value.length + " / 500";
-          });
-
-        // Submit Firebase Document
-        document
-          .getElementById("submitReview")
-          .addEventListener("click", async () => {
-            const body = document.getElementById("reviewBody").value.trim();
-            const msg = document.getElementById("formMsg");
-
-            if (!selectedStars) {
-              msg.className = "form-msg err";
-              msg.textContent = "Please select a star rating.";
-              return;
-            }
-            if (!body) {
-              msg.className = "form-msg err";
-              msg.textContent = "Please write something.";
-              return;
-            }
-
-            const user = auth.currentUser;
-            if (!user) return;
-
-            document.getElementById("submitReview").textContent =
-              "Submitting...";
-
-            try {
-              await addDoc(collection(db, "reviews"), {
-                user_email: user.email,
-                user_uid: user.uid,
-                stars: selectedStars,
-                body: body,
-                approved: false, // The dashboard controls this
-                created_at: serverTimestamp(),
-              });
-
-              msg.className = "form-msg ok";
-              msg.textContent =
-                "Thank you! Your review is pending approval from admin.";
-              document.getElementById("reviewBody").value = "";
-              document.getElementById("charCount").textContent = "0 / 500";
-              selectedStars = 0;
-              stars.forEach((x) => x.classList.remove("lit"));
-            } catch (error) {
-              msg.className = "form-msg err";
-              msg.textContent = "Failed to submit review.";
-            }
-            document.getElementById("submitReview").textContent =
-              "Submit Review";
           });
 
         // Load Reviews from Firestore
