@@ -8,7 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- (Empty line - We will load Firebase securely in the main script module) -->
     <style>
       *,
       *::before,
@@ -960,28 +960,54 @@
 
       <div class="review-form-wrapper reveal" id="reviewFormWrapper">
         <div id="authArea">
-          <p class="auth-prompt">Sign in to leave a review</p>
-          <button class="btn btn-dark" id="signInBtn">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-            Sign in with Google
-          </button>
+          <p class="auth-prompt">App Users Only: Sign in to leave a review</p>
+          <div
+            style="
+              display: flex;
+              gap: 0.8rem;
+              margin-bottom: 0.8rem;
+              flex-wrap: wrap;
+            "
+          >
+            <input
+              type="email"
+              id="emailInput"
+              placeholder="Email"
+              style="
+                padding: 0.8rem 1rem;
+                border-radius: 8px;
+                border: 1.5px solid rgba(26, 22, 18, 0.12);
+                background: var(--bg);
+                font-family: &quot;DM Sans&quot;, sans-serif;
+                flex: 1;
+                min-width: 200px;
+              "
+            />
+            <input
+              type="password"
+              id="passInput"
+              placeholder="Password"
+              style="
+                padding: 0.8rem 1rem;
+                border-radius: 8px;
+                border: 1.5px solid rgba(26, 22, 18, 0.12);
+                background: var(--bg);
+                font-family: &quot;DM Sans&quot;, sans-serif;
+                flex: 1;
+                min-width: 200px;
+              "
+            />
+          </div>
+          <p
+            id="loginMsg"
+            style="
+              color: var(--accent);
+              font-size: 0.85rem;
+              margin-bottom: 1rem;
+              display: none;
+            "
+          ></p>
+          <button class="btn btn-dark" id="signInBtn">Sign In</button>
         </div>
         <div id="reviewForm" style="display: none">
           <div class="reviewer-info">
@@ -1082,10 +1108,35 @@
       <p class="footer-copy">© 2025 Zeetionary. Kurdish–English Dictionary.</p>
     </footer>
 
-    <script>
-      const SUPABASE_URL = "https://pmmkjqmtivepppxshfwk.supabase.co";
-      const SUPABASE_KEY = "sb_publishable_8edHisUrgtiluqEaHUuRjw_NUdIRpWg";
-      const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        signOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        query,
+        where,
+        getDocs,
+        orderBy,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        // REPLACE THESE WITH YOUR FIREBASE APP CREDENTIALS
+        apiKey: "AIzaSyDxUTDS4ZAjQbw4EQCBwo0SdTMXKH68OtE",
+        authDomain: "zeetionary-9915d.firebaseapp.com",
+        projectId: "zeetionary-9915d",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
 
       // Nav scroll
       const nav = document.getElementById("nav");
@@ -1184,34 +1235,61 @@
         let reviewsData = [];
         let reviewsCurrent = 0;
 
-        // Auth state
-        sb.auth.onAuthStateChange((_event, session) => {
-          const user = session?.user;
+        // Firebase Auth listener
+        onAuthStateChanged(auth, (user) => {
           if (user) {
             document.getElementById("authArea").style.display = "none";
             document.getElementById("reviewForm").style.display = "block";
+            // Dynamically generate UI avatar based on the first letter of their email
             document.getElementById("userAvatar").src =
-              user.user_metadata?.avatar_url || "";
+              "https://ui-avatars.com/api/?name=" +
+              user.email.charAt(0) +
+              "&background=c0622a&color=fff";
             document.getElementById("userName").textContent =
-              user.user_metadata?.full_name || user.email;
+              user.email.split("@")[0];
           } else {
             document.getElementById("authArea").style.display = "block";
             document.getElementById("reviewForm").style.display = "none";
+            if (document.getElementById("emailInput"))
+              document.getElementById("emailInput").value = "";
+            if (document.getElementById("passInput"))
+              document.getElementById("passInput").value = "";
+            document.getElementById("loginMsg").style.display = "none";
           }
         });
 
-        document.getElementById("signInBtn").addEventListener("click", () => {
-          sb.auth.signInWithOAuth({
-            provider: "google",
-            options: { redirectTo: window.location.href },
+        // Firebase Login action
+        document
+          .getElementById("signInBtn")
+          .addEventListener("click", async () => {
+            const email = document.getElementById("emailInput").value.trim();
+            const pass = document.getElementById("passInput").value.trim();
+            const msg = document.getElementById("loginMsg");
+            const btn = document.getElementById("signInBtn");
+
+            if (!email || !pass) {
+              msg.style.display = "block";
+              msg.textContent = "Enter your Zeetionary app email and password.";
+              return;
+            }
+            try {
+              msg.style.display = "none";
+              btn.textContent = "Loading...";
+              await signInWithEmailAndPassword(auth, email, pass);
+              btn.textContent = "Sign In";
+            } catch (err) {
+              msg.style.display = "block";
+              msg.textContent =
+                "Login failed: User not found or incorrect password.";
+              btn.textContent = "Sign In";
+            }
           });
-        });
 
         document
           .getElementById("signOutBtn")
-          .addEventListener("click", () => sb.auth.signOut());
+          .addEventListener("click", () => signOut(auth));
 
-        // Star picker
+        // Star picker (Untouched DOM logic)
         const stars = document.querySelectorAll(".star");
         stars.forEach((s) => {
           s.addEventListener("click", () => {
@@ -1243,12 +1321,13 @@
               this.value.length + " / 500";
           });
 
-        // Submit
+        // Submit Firebase Document
         document
           .getElementById("submitReview")
           .addEventListener("click", async () => {
             const body = document.getElementById("reviewBody").value.trim();
             const msg = document.getElementById("formMsg");
+
             if (!selectedStars) {
               msg.className = "form-msg err";
               msg.textContent = "Please select a star rating.";
@@ -1259,46 +1338,65 @@
               msg.textContent = "Please write something.";
               return;
             }
-            const {
-              data: { session },
-            } = await sb.auth.getSession();
-            if (!session) {
+
+            const user = auth.currentUser;
+            if (!user) return;
+
+            document.getElementById("submitReview").textContent =
+              "Submitting...";
+
+            try {
+              await addDoc(collection(db, "reviews"), {
+                user_email: user.email,
+                user_uid: user.uid,
+                stars: selectedStars,
+                body: body,
+                approved: false, // The dashboard controls this
+                created_at: serverTimestamp(),
+              });
+
+              msg.className = "form-msg ok";
+              msg.textContent =
+                "Thank you! Your review is pending approval from admin.";
+              document.getElementById("reviewBody").value = "";
+              document.getElementById("charCount").textContent = "0 / 500";
+              selectedStars = 0;
+              stars.forEach((x) => x.classList.remove("lit"));
+            } catch (error) {
               msg.className = "form-msg err";
-              msg.textContent = "Please sign in first.";
-              return;
+              msg.textContent = "Failed to submit review.";
             }
-            const user = session.user;
-            const { error } = await sb.from("reviews").insert({
-              user_name: user.user_metadata?.full_name || user.email,
-              user_avatar: user.user_metadata?.avatar_url || "",
-              user_email: user.email,
-              stars: selectedStars,
-              body: body,
-              approved: false,
-            });
-            if (error) {
-              msg.className = "form-msg err";
-              msg.textContent = "Something went wrong. Try again.";
-              return;
-            }
-            msg.className = "form-msg ok";
-            msg.textContent = "Thank you! Your review is pending approval.";
-            document.getElementById("reviewBody").value = "";
-            document.getElementById("charCount").textContent = "0 / 500";
-            selectedStars = 0;
-            stars.forEach((x) => x.classList.remove("lit"));
+            document.getElementById("submitReview").textContent =
+              "Submit Review";
           });
 
-        // Load reviews
+        // Load Reviews from Firestore
         async function loadReviews() {
-          const { data, error } = await sb
-            .from("reviews")
-            .select("*")
-            .eq("approved", true)
-            .order("created_at", { ascending: false });
-          if (error || !data) return;
-          reviewsData = data;
-          renderReviews();
+          try {
+            // Need composite index in Firestore for "approved" (asc) + "created_at" (desc)
+            const q = query(
+              collection(db, "reviews"),
+              where("approved", "==", true),
+              orderBy("created_at", "desc"),
+            );
+
+            const querySnapshot = await getDocs(q);
+            reviewsData = [];
+
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              // handle timestamp safely in case it hasn't written to server completely yet
+              let time = new Date().getTime();
+              if (data.created_at) {
+                time = data.created_at.toDate();
+              }
+              reviewsData.push({ id: doc.id, ...data, time });
+            });
+            renderReviews();
+          } catch (e) {
+            console.error("Firestore Load Error:", e);
+            // Ignore missing index error gracefully while developing
+          }
         }
 
         function renderReviews() {
@@ -1308,28 +1406,38 @@
           const dotsEl = document.getElementById("reviewsDots");
           track.innerHTML = "";
           dotsEl.innerHTML = "";
+
           if (!reviewsData.length) {
             noReviews.style.display = "block";
             return;
           }
           noReviews.style.display = "none";
+
           reviewsData.forEach((r, i) => {
-            const date = new Date(r.created_at).toLocaleDateString("en-GB", {
+            const date = new Date(r.time).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "short",
               year: "numeric",
             });
-            const stars = "★".repeat(r.stars) + "☆".repeat(5 - r.stars);
+            const starsHTML = "★".repeat(r.stars) + "☆".repeat(5 - r.stars);
+
+            // Standard avatar to keep visual cleanliness for user profiles that have no uploaded images.
+            const avatarUrl =
+              "https://ui-avatars.com/api/?name=" +
+              r.user_email.charAt(0) +
+              "&background=ede8de&color=1a1612";
+
             const card = document.createElement("div");
             card.className = "review-card";
             card.innerHTML = `
             <div class="review-card-top">
-              <img class="review-avatar" src="${r.user_avatar || ""}" onerror="this.style.display='none'" alt="">
-              <div><div class="review-name">${r.user_name}</div><div class="review-date">${date}</div></div>
+              <img class="review-avatar" src="${avatarUrl}" alt="">
+              <div><div class="review-name">App User</div><div class="review-date">${date}</div></div>
             </div>
-            <div class="review-stars">${stars}</div>
+            <div class="review-stars">${starsHTML}</div>
             <div class="review-body">${r.body}</div>`;
             track.appendChild(card);
+
             const d = document.createElement("div");
             d.className = "dot" + (i === 0 ? " active" : "");
             d.addEventListener("click", () => reviewsGoTo(i));
@@ -1340,6 +1448,7 @@
         }
 
         function reviewsGoTo(idx) {
+          if (!reviewsData.length) return;
           idx = (idx + reviewsData.length) % reviewsData.length;
           reviewsCurrent = idx;
           document.getElementById("reviewsTrack").style.transform =
@@ -1356,16 +1465,11 @@
           .getElementById("reviewsNext")
           .addEventListener("click", () => reviewsGoTo(reviewsCurrent + 1));
 
-        // Touch swipe for reviews
         let rtx = 0;
         const ro = document.getElementById("reviewsTrackOuter");
-        ro.addEventListener(
-          "touchstart",
-          (e) => {
-            rtx = e.touches[0].clientX;
-          },
-          { passive: true },
-        );
+        ro.addEventListener("touchstart", (e) => (rtx = e.touches[0].clientX), {
+          passive: true,
+        });
         ro.addEventListener("touchend", (e) => {
           const d = rtx - e.changedTouches[0].clientX;
           if (Math.abs(d) > 40) reviewsGoTo(reviewsCurrent + (d > 0 ? 1 : -1));
