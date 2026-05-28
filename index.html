@@ -1185,12 +1185,15 @@
       import {
         getFirestore,
         collection,
+        doc,
+        getDoc,
         addDoc,
         query,
         where,
         getDocs,
         orderBy,
         serverTimestamp,
+        updateDoc,
       } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
       const firebaseConfig = {
@@ -1298,6 +1301,7 @@
       // ── Reviews ──
       (function () {
         let selectedStars = 0;
+        let globalUserDisplayName = "App User"; // To store name for submission
         let reviewsData = [];
         let reviewsCurrent = 0;
 
@@ -1346,9 +1350,10 @@
               const reviewData = {
                 user_email: user.email,
                 user_uid: user.uid,
+                display_name: globalUserDisplayName,
                 stars: selectedStars,
                 body: body,
-                approved: false, // MANDATORY: Edits must be re-approved
+                approved: false,
                 created_at: serverTimestamp(),
               };
 
@@ -1369,6 +1374,19 @@
           });
 
         async function checkUserReview(uid) {
+          // A. Fetch their profile name from 'users' collection
+          try {
+            const userDoc = await getDoc(doc(db, "users", uid));
+            if (userDoc.exists()) {
+              globalUserDisplayName = userDoc.data().displayName || "App User";
+              document.getElementById("userName").textContent =
+                globalUserDisplayName;
+            }
+          } catch (e) {
+            console.error("Could not fetch name:", e);
+          }
+
+          // B. Existing logic to check for their review
           const q = query(
             collection(db, "reviews"),
             where("user_uid", "==", uid),
@@ -1376,16 +1394,10 @@
           const snap = await getDocs(q);
 
           if (!snap.empty) {
-            const doc = snap.docs[0];
-            existingReviewId = doc.id; // Store globally
-            const data = doc.data();
+            const revDoc = snap.docs[0];
+            existingReviewId = revDoc.id;
+            const data = revDoc.data();
 
-            // Pre-fill text area so if they click edit, their old text is there
-            document.getElementById("reviewBody").value = data.body;
-            document.getElementById("charCount").textContent =
-              data.body.length + " / 500";
-
-            // Show "Your Review" area, Hide the Composer
             document.getElementById("myReviewDisplay").style.display = "block";
             document.getElementById("composerArea").style.display = "none";
             document.getElementById("myReviewText").textContent =
@@ -1532,8 +1544,9 @@
             card.innerHTML = `
             <div class="review-card-top">
               <img class="review-avatar" src="${avatarUrl}" alt="">
-              <div><div class="review-name">App User</div><div class="review-date">${date}</div></div>
+              <div><div class="review-name">${r.display_name || "App User"}</div><div class="review-date">${date}</div></div>
             </div>
+            <div class="review-name">${r.display_name || "App User"}</div>
             <div class="review-stars">${starsHTML}</div>
             <div class="review-body">${r.body}</div>`;
             track.appendChild(card);
