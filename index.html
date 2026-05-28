@@ -612,6 +612,7 @@
         width: 100%;
         max-width: 480px;
         overflow: hidden;
+        transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .reviews-track {
         display: flex;
@@ -643,22 +644,22 @@
       }
       .review-name {
         font-weight: 500;
-        font-size: 0.9rem;
+        font-size: 1.05rem;
       }
       .review-date {
-        font-size: 0.75rem;
+        font-size: 0.88rem;
         color: var(--muted);
       }
       .review-stars {
         color: #e8a020;
-        font-size: 1.1rem;
+        font-size: 1.4rem;
         margin-bottom: 0.75rem;
         letter-spacing: 0.05em;
       }
       .review-body {
-        font-size: 0.88rem;
+        font-size: 1rem;
         color: var(--muted);
-        line-height: 1.7;
+        line-height: 1.75;
       }
       .no-reviews {
         font-size: 0.9rem;
@@ -1602,12 +1603,16 @@
           if (!reviewsData.length) return;
           idx = (idx + reviewsData.length) % reviewsData.length;
           reviewsCurrent = idx;
+          const cards = document.querySelectorAll(".review-card");
           const cardHeight =
-            document.querySelector(".review-card")?.offsetHeight || 0;
+            cards[idx]?.offsetHeight || cards[0]?.offsetHeight || 0;
           document.getElementById("reviewsTrack").style.transform =
-            `translateY(-${idx * (cardHeight + 0)}px)`;
+            `translateY(-${Array.from(cards)
+              .slice(0, idx)
+              .reduce((sum, c) => sum + c.offsetHeight, 0)}px)`;
           document.getElementById("reviewsTrackOuter").style.height =
             cardHeight + "px";
+
           document
             .querySelectorAll("#reviewsDots .dot")
             .forEach((d, i) => d.classList.toggle("active", i === idx));
