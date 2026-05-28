@@ -1374,48 +1374,58 @@
           });
 
         async function checkUserReview(uid) {
-          // A. Fetch their profile name from 'users' collection
           try {
+            // 1. Fetch current profile name (Source of Truth)
             const userDoc = await getDoc(doc(db, "users", uid));
             if (userDoc.exists()) {
               globalUserDisplayName = userDoc.data().displayName || "App User";
               document.getElementById("userName").textContent =
                 globalUserDisplayName;
             }
+
+            // 2. Fetch the user's specific review
+            const q = query(
+              collection(db, "reviews"),
+              where("user_uid", "==", uid),
+            );
+            const snap = await getDocs(q);
+
+            if (!snap.empty) {
+              const revDoc = snap.docs[0];
+              existingReviewId = revDoc.id;
+              const data = revDoc.data();
+
+              // 3. AUTO-SYNC: If stored name != actual name, update silently
+              if (data.display_name !== globalUserDisplayName) {
+                await updateDoc(doc(db, "reviews", existingReviewId), {
+                  display_name: globalUserDisplayName,
+                  // Note: We don't change 'approved' here, only the name label
+                });
+              }
+
+              // Render State (Keep your existing display logic here...)
+              document.getElementById("reviewBody").value = data.body;
+              document.getElementById("myReviewDisplay").style.display =
+                "block";
+              document.getElementById("composerArea").style.display = "none";
+              document.getElementById("myReviewText").textContent =
+                `"${data.body}"`;
+              document.getElementById("myReviewStars").innerHTML =
+                "★".repeat(data.stars) + "☆".repeat(5 - data.stars);
+              const statusEl = document.getElementById("myReviewStatus");
+              statusEl.textContent = data.approved
+                ? "● PUBLISHED"
+                : "○ PENDING APPROVAL";
+              statusEl.style.color = data.approved
+                ? "var(--accent2)"
+                : "var(--accent)";
+            } else {
+              existingReviewId = null;
+              document.getElementById("myReviewDisplay").style.display = "none";
+              document.getElementById("composerArea").style.display = "block";
+            }
           } catch (e) {
-            console.error("Could not fetch name:", e);
-          }
-
-          // B. Existing logic to check for their review
-          const q = query(
-            collection(db, "reviews"),
-            where("user_uid", "==", uid),
-          );
-          const snap = await getDocs(q);
-
-          if (!snap.empty) {
-            const revDoc = snap.docs[0];
-            existingReviewId = revDoc.id;
-            const data = revDoc.data();
-
-            document.getElementById("myReviewDisplay").style.display = "block";
-            document.getElementById("composerArea").style.display = "none";
-            document.getElementById("myReviewText").textContent =
-              `"${data.body}"`;
-            document.getElementById("myReviewStars").innerHTML =
-              "★".repeat(data.stars) + "☆".repeat(5 - data.stars);
-
-            const statusEl = document.getElementById("myReviewStatus");
-            statusEl.textContent = data.approved
-              ? "● PUBLISHED"
-              : "○ PENDING APPROVAL";
-            statusEl.style.color = data.approved
-              ? "var(--accent2)"
-              : "var(--accent)";
-          } else {
-            existingReviewId = null;
-            document.getElementById("myReviewDisplay").style.display = "none";
-            document.getElementById("composerArea").style.display = "block";
+            console.error("CheckUserReview error:", e);
           }
         }
 
@@ -1544,7 +1554,10 @@
             card.innerHTML = `
             <div class="review-card-top">
               <img class="review-avatar" src="${avatarUrl}" alt="">
-              <div><div class="review-name">${r.display_name || "App User"}</div><div class="review-date">${date}</div></div>
+              <div>
+                <div class="review-name">${r.display_name || "App User"}</div>
+                <div class="review-date">${date}</div>
+              </div>
             </div>
             <div class="review-stars">${starsHTML}</div>
             <div class="review-body">${r.body}</div>`;
