@@ -1120,45 +1120,58 @@
       </div>
 
       <div class="reviews-slider-wrapper reveal">
-        <div class="reviews-track-outer" id="reviewsTrackOuter">
-          <div class="reviews-track" id="reviewsTrack"></div>
-        </div>
         <div
-          class="slider-controls"
-          id="reviewsControls"
-          style="
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.8rem;
-            margin-top: 1rem;
-          "
+          class="reviews-track-outer"
+          id="reviewsTrackOuter"
+          style="position: relative"
         >
-          <button class="slider-btn" id="reviewsPrev">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <polyline points="18 15 12 9 6 15" />
-            </svg>
-          </button>
+          <div class="reviews-track" id="reviewsTrack"></div>
           <div
-            class="slider-dots"
-            id="reviewsDots"
-            style="flex-direction: column"
-          ></div>
-          <button class="slider-btn" id="reviewsNext">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+            id="reviewsControls"
+            style="
+              display: none;
+              position: absolute;
+              top: 1.8rem;
+              right: 1.8rem;
+              flex-direction: row;
+              align-items: center;
+              gap: 0.4rem;
+            "
+          >
+            <button
+              class="slider-btn"
+              id="reviewsPrev"
+              style="width: 32px; height: 32px"
             >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+            </button>
+            <div
+              class="slider-dots"
+              id="reviewsDots"
+              style="flex-direction: row; gap: 0.35rem"
+            ></div>
+            <button
+              class="slider-btn"
+              id="reviewsNext"
+              style="width: 32px; height: 32px"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          </div>
         </div>
         <p class="no-reviews" id="noReviews" style="display: none">
           No reviews yet. Be the first!
