@@ -1009,29 +1009,95 @@
           ></p>
           <button class="btn btn-dark" id="signInBtn">Sign In</button>
         </div>
+
         <div id="reviewForm" style="display: none">
-          <div class="reviewer-info">
-            <img id="userAvatar" src="" alt="" class="avatar" />
-            <span id="userName"></span>
-            <button class="sign-out-btn" id="signOutBtn">Sign out</button>
+          <!-- USER REVIEW DISPLAY (Shown when they have already submitted) -->
+          <div
+            id="myReviewDisplay"
+            style="
+              display: none;
+              border-bottom: 1px solid rgba(26, 22, 18, 0.1);
+              padding-bottom: 1.5rem;
+              margin-bottom: 1.5rem;
+            "
+          >
+            <p
+              style="
+                font-size: 0.8rem;
+                color: var(--accent2);
+                margin-bottom: 0.5rem;
+                font-weight: 500;
+              "
+            >
+              YOUR REVIEW
+            </p>
+            <div
+              id="myReviewStars"
+              class="review-stars"
+              style="margin-bottom: 0.5rem"
+            ></div>
+            <p
+              id="myReviewText"
+              style="
+                font-size: 0.95rem;
+                line-height: 1.6;
+                color: var(--ink);
+                font-style: italic;
+              "
+            ></p>
+            <p
+              id="myReviewStatus"
+              style="font-size: 0.75rem; margin-top: 0.8rem; font-weight: bold"
+            ></p>
+            <button
+              class="btn btn-outline"
+              id="editReviewBtn"
+              style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.8rem"
+            >
+              Edit Review
+            </button>
           </div>
-          <div class="star-picker" id="starPicker">
-            <span class="star" data-v="1">★</span>
-            <span class="star" data-v="2">★</span>
-            <span class="star" data-v="3">★</span>
-            <span class="star" data-v="4">★</span>
-            <span class="star" data-v="5">★</span>
-          </div>
-          <textarea
-            id="reviewBody"
-            class="review-textarea"
-            placeholder="Write your review…"
-            maxlength="500"
-          ></textarea>
-          <div class="form-footer">
-            <span id="charCount" class="char-count">0 / 500</span>
-            <button class="btn btn-dark" id="submitReview">
-              Submit Review
+
+          <!-- COMPOSER (Hidden if they have a review, shown if they click Edit) -->
+          <div id="composerArea">
+            <div class="reviewer-info">
+              <img id="userAvatar" src="" alt="" class="avatar" />
+              <span id="userName"></span>
+              <button class="sign-out-btn" id="signOutBtn">Sign out</button>
+            </div>
+            <div class="star-picker" id="starPicker">
+              <span class="star" data-v="1">★</span>
+              <span class="star" data-v="2">★</span>
+              <span class="star" data-v="3">★</span>
+              <span class="star" data-v="4">★</span>
+              <span class="star" data-v="5">★</span>
+            </div>
+            <textarea
+              id="reviewBody"
+              class="review-textarea"
+              placeholder="Write your review…"
+              maxlength="500"
+            ></textarea>
+            <div class="form-footer">
+              <span id="charCount" class="char-count">0 / 500</span>
+              <button class="btn btn-dark" id="submitReview">
+                Submit Review
+              </button>
+            </div>
+            <button
+              id="cancelEditBtn"
+              style="
+                display: none;
+                background: none;
+                border: none;
+                color: var(--muted);
+                font-size: 0.8rem;
+                margin-top: 10px;
+                cursor: pointer;
+                text-decoration: underline;
+              "
+            >
+              Cancel Editing
             </button>
           </div>
           <p id="formMsg" class="form-msg"></p>
@@ -1235,28 +1301,113 @@
         let reviewsData = [];
         let reviewsCurrent = 0;
 
-        // Firebase Auth listener
-        onAuthStateChanged(auth, (user) => {
+        let existingReviewId = null;
+
+        onAuthStateChanged(auth, async (user) => {
           if (user) {
             document.getElementById("authArea").style.display = "none";
             document.getElementById("reviewForm").style.display = "block";
-            // Dynamically generate UI avatar based on the first letter of their email
             document.getElementById("userAvatar").src =
-              "https://ui-avatars.com/api/?name=" +
-              user.email.charAt(0) +
-              "&background=c0622a&color=fff";
+              `https://ui-avatars.com/api/?name=${user.email.charAt(0)}&background=c0622a&color=fff`;
             document.getElementById("userName").textContent =
               user.email.split("@")[0];
+
+            // NEW: Check if this user already wrote a review
+            checkUserReview(user.uid);
           } else {
             document.getElementById("authArea").style.display = "block";
             document.getElementById("reviewForm").style.display = "none";
-            if (document.getElementById("emailInput"))
-              document.getElementById("emailInput").value = "";
-            if (document.getElementById("passInput"))
-              document.getElementById("passInput").value = "";
-            document.getElementById("loginMsg").style.display = "none";
           }
         });
+
+        document
+          .getElementById("editReviewBtn")
+          .addEventListener("click", () => {
+            document.getElementById("myReviewDisplay").style.display = "none";
+            document.getElementById("composerArea").style.display = "block";
+            document.getElementById("cancelEditBtn").style.display = "inline";
+          });
+        document
+          .getElementById("submitReview")
+          .addEventListener("click", async () => {
+            const body = document.getElementById("reviewBody").value.trim();
+            const user = auth.currentUser;
+            if (!user) return;
+            if (!selectedStars) {
+              alert("Please pick stars");
+              return;
+            }
+            if (!body) {
+              alert("Please write a review");
+              return;
+            }
+
+            try {
+              const reviewData = {
+                user_email: user.email,
+                user_uid: user.uid,
+                stars: selectedStars,
+                body: body,
+                approved: false, // MANDATORY: Edits must be re-approved
+                created_at: serverTimestamp(),
+              };
+
+              if (existingReviewId) {
+                const { doc, updateDoc } =
+                  await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+                await updateDoc(
+                  doc(db, "reviews", existingReviewId),
+                  reviewData,
+                );
+              } else {
+                await addDoc(collection(db, "reviews"), reviewData);
+              }
+              location.reload();
+            } catch (e) {
+              alert(
+                "Submission failed: Make sure your email/pass are correct and your rules allow the update.",
+              );
+            }
+          });
+
+        async function checkUserReview(uid) {
+          const q = query(
+            collection(db, "reviews"),
+            where("user_uid", "==", uid),
+          );
+          const snap = await getDocs(q);
+
+          if (!snap.empty) {
+            const doc = snap.docs[0];
+            existingReviewId = doc.id; // Store globally
+            const data = doc.data();
+
+            // Pre-fill text area so if they click edit, their old text is there
+            document.getElementById("reviewBody").value = data.body;
+            document.getElementById("charCount").textContent =
+              data.body.length + " / 500";
+
+            // Show "Your Review" area, Hide the Composer
+            document.getElementById("myReviewDisplay").style.display = "block";
+            document.getElementById("composerArea").style.display = "none";
+            document.getElementById("myReviewText").textContent =
+              `"${data.body}"`;
+            document.getElementById("myReviewStars").innerHTML =
+              "★".repeat(data.stars) + "☆".repeat(5 - data.stars);
+
+            const statusEl = document.getElementById("myReviewStatus");
+            statusEl.textContent = data.approved
+              ? "● PUBLISHED"
+              : "○ PENDING APPROVAL";
+            statusEl.style.color = data.approved
+              ? "var(--accent2)"
+              : "var(--accent)";
+          } else {
+            existingReviewId = null;
+            document.getElementById("myReviewDisplay").style.display = "none";
+            document.getElementById("composerArea").style.display = "block";
+          }
+        }
 
         // Firebase Login action
         document
