@@ -1011,22 +1011,35 @@
         </div>
 
         <div id="reviewForm" style="display: none">
-          <!-- USER REVIEW DISPLAY (Shown when they have already submitted) -->
+          <!-- PERSISTENT USER HEADER -->
           <div
-            id="myReviewDisplay"
+            class="reviewer-info"
             style="
-              display: none;
               border-bottom: 1px solid rgba(26, 22, 18, 0.1);
-              padding-bottom: 1.5rem;
+              padding-bottom: 1.2rem;
               margin-bottom: 1.5rem;
             "
           >
+            <img id="userAvatar" src="" alt="" class="avatar" />
+            <span id="userName" style="font-weight: 500"></span>
+            <button
+              class="sign-out-btn"
+              id="signOutBtn"
+              style="margin-left: auto"
+            >
+              Sign out
+            </button>
+          </div>
+
+          <!-- YOUR REVIEW (Falconer will see this + the sign out button now) -->
+          <div id="myReviewDisplay" style="display: none; padding-bottom: 1rem">
             <p
               style="
-                font-size: 0.8rem;
+                font-size: 0.75rem;
+                letter-spacing: 0.08em;
                 color: var(--accent2);
                 margin-bottom: 0.5rem;
-                font-weight: 500;
+                font-weight: bold;
               "
             >
               YOUR REVIEW
@@ -1058,13 +1071,9 @@
             </button>
           </div>
 
-          <!-- COMPOSER (Hidden if they have a review, shown if they click Edit) -->
+          <!-- COMPOSER AREA (Everything else stays here) -->
           <div id="composerArea">
-            <div class="reviewer-info">
-              <img id="userAvatar" src="" alt="" class="avatar" />
-              <span id="userName"></span>
-              <button class="sign-out-btn" id="signOutBtn">Sign out</button>
-            </div>
+            <!-- (Remove the reviewer-info from here as it's now above) -->
             <div class="star-picker" id="starPicker">
               <span class="star" data-v="1">★</span>
               <span class="star" data-v="2">★</span>
