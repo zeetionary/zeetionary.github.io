@@ -1375,7 +1375,7 @@
 
         async function checkUserReview(uid) {
           try {
-            // 1. Fetch current profile name (Source of Truth)
+            // 1. Fetch current profile name (Source of Truth from your app)
             const userDoc = await getDoc(doc(db, "users", uid));
             if (userDoc.exists()) {
               globalUserDisplayName = userDoc.data().displayName || "App User";
@@ -1395,15 +1395,16 @@
               existingReviewId = revDoc.id;
               const data = revDoc.data();
 
-              // 3. AUTO-SYNC: If stored name != actual name, update silently
+              // 3. AUTO-SYNC: If the review name is outdated, update it silently now
               if (data.display_name !== globalUserDisplayName) {
                 await updateDoc(doc(db, "reviews", existingReviewId), {
                   display_name: globalUserDisplayName,
-                  // Note: We don't change 'approved' here, only the name label
+                  // NOTE: We don't reset 'approved' to false here
+                  // because we are only fixing the name label, not the content.
                 });
               }
 
-              // Render State (Keep your existing display logic here...)
+              // Render composer state
               document.getElementById("reviewBody").value = data.body;
               document.getElementById("myReviewDisplay").style.display =
                 "block";
@@ -1412,6 +1413,7 @@
                 `"${data.body}"`;
               document.getElementById("myReviewStars").innerHTML =
                 "★".repeat(data.stars) + "☆".repeat(5 - data.stars);
+
               const statusEl = document.getElementById("myReviewStatus");
               statusEl.textContent = data.approved
                 ? "● PUBLISHED"
@@ -1425,7 +1427,7 @@
               document.getElementById("composerArea").style.display = "block";
             }
           } catch (e) {
-            console.error("CheckUserReview error:", e);
+            console.error("Sync Error:", e);
           }
         }
 
