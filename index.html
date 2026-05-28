@@ -8,6 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
       *,
       *::before,
@@ -16,7 +17,6 @@
         margin: 0;
         padding: 0;
       }
-
       :root {
         --bg: #f5f0e8;
         --ink: #1a1612;
@@ -25,11 +25,9 @@
         --muted: #8a7f72;
         --card: #ede8de;
       }
-
       html {
         scroll-behavior: smooth;
       }
-
       body {
         background: var(--bg);
         color: var(--ink);
@@ -37,7 +35,6 @@
         font-weight: 300;
         overflow-x: hidden;
       }
-
       body::before {
         content: "";
         position: fixed;
@@ -157,7 +154,6 @@
         opacity: 0;
         animation: fadeUp 0.8s 0.9s forwards;
       }
-
       .btn {
         display: inline-flex;
         align-items: center;
@@ -201,7 +197,6 @@
         height: 18px;
         flex-shrink: 0;
       }
-
       .scroll-hint {
         position: absolute;
         bottom: 2.5rem;
@@ -237,7 +232,6 @@
           opacity: 0;
         }
       }
-
       .deco-letter {
         position: absolute;
         font-family: "Playfair Display", serif;
@@ -374,6 +368,297 @@
         text-transform: uppercase;
       }
 
+      /* Screenshots slider */
+      .screenshots-section {
+        overflow: hidden;
+      }
+      .slider-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2.5rem;
+      }
+      .ambient-bg {
+        position: absolute;
+        width: 300px;
+        height: 560px;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.4;
+        pointer-events: none;
+        transition: background 1.2s ease;
+        z-index: 0;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .slider {
+        position: relative;
+        z-index: 1;
+        width: 260px;
+        height: 540px;
+        overflow: hidden;
+        border-radius: 38px;
+      }
+      .slides-track {
+        display: flex;
+        height: 100%;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+      }
+      .slide {
+        flex: 0 0 260px;
+        width: 260px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .phone-frame {
+        width: 100%;
+        height: 100%;
+        border-radius: 36px;
+        background: var(--ink);
+        padding: 10px;
+        box-shadow:
+          0 30px 80px rgba(0, 0, 0, 0.25),
+          0 0 0 1.5px rgba(255, 255, 255, 0.07) inset;
+        position: relative;
+        overflow: hidden;
+      }
+      .phone-frame::before {
+        content: "";
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 10px;
+        z-index: 2;
+      }
+      .screen-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 28px;
+        display: block;
+      }
+      .slider-controls {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        z-index: 1;
+      }
+      .slider-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(26, 22, 18, 0.18);
+        background: var(--bg);
+        color: var(--ink);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.25s,
+          transform 0.2s;
+      }
+      .slider-btn:hover {
+        background: var(--ink);
+        color: var(--bg);
+        transform: scale(1.08);
+      }
+      .slider-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+      .slider-dots {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--muted);
+        opacity: 0.35;
+        transition:
+          opacity 0.3s,
+          transform 0.3s,
+          background 0.3s;
+        cursor: pointer;
+      }
+      .dot.active {
+        opacity: 1;
+        transform: scale(1.3);
+        background: var(--accent);
+      }
+
+      /* Reviews */
+      .reviews-section {
+      }
+      .review-form-wrapper {
+        background: var(--card);
+        border: 1.5px solid rgba(26, 22, 18, 0.08);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+      }
+      .auth-prompt {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+      .reviewer-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.2rem;
+      }
+      .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      .sign-out-btn {
+        margin-left: auto;
+        background: none;
+        border: 1px solid rgba(26, 22, 18, 0.2);
+        color: var(--muted);
+        font-size: 0.78rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .sign-out-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .star-picker {
+        display: flex;
+        gap: 0.3rem;
+        margin-bottom: 1rem;
+      }
+      .star {
+        font-size: 2rem;
+        color: rgba(26, 22, 18, 0.15);
+        cursor: pointer;
+        transition:
+          color 0.15s,
+          transform 0.15s;
+        line-height: 1;
+      }
+      .star.lit {
+        color: #e8a020;
+      }
+      .star:hover {
+        transform: scale(1.2);
+      }
+      .review-textarea {
+        width: 100%;
+        min-height: 100px;
+        background: var(--bg);
+        border: 1.5px solid rgba(26, 22, 18, 0.12);
+        border-radius: 8px;
+        padding: 0.9rem 1rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.9rem;
+        color: var(--ink);
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .review-textarea:focus {
+        border-color: var(--accent2);
+      }
+      .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.8rem;
+      }
+      .char-count {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      .form-msg {
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+      }
+      .form-msg.ok {
+        color: var(--accent2);
+      }
+      .form-msg.err {
+        color: var(--accent);
+      }
+
+      /* Reviews cards slider */
+      .reviews-slider-wrapper {
+        position: relative;
+      }
+      .reviews-track-outer {
+        overflow: hidden;
+      }
+      .reviews-track {
+        display: flex;
+        gap: 1.5rem;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+      }
+      .review-card {
+        flex: 0 0 300px;
+        background: var(--card);
+        border: 1.5px solid rgba(26, 22, 18, 0.07);
+        border-radius: 12px;
+        padding: 1.8rem;
+      }
+      .review-card-top {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .review-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: rgba(26, 22, 18, 0.08);
+      }
+      .review-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+      .review-date {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .review-stars {
+        color: #e8a020;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.05em;
+      }
+      .review-body {
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+      .no-reviews {
+        font-size: 0.9rem;
+        color: var(--muted);
+        text-align: center;
+        padding: 2rem 0;
+      }
+
       /* CTA */
       .cta-section {
         padding: 7rem 2rem;
@@ -443,153 +728,9 @@
         transform: none;
       }
 
-      /* ── Screenshots Slider ── */
-      .screenshots-section {
-        overflow: hidden;
-      }
-
-      .slider-wrapper {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2.5rem;
-      }
-
-      /* Ambient glow */
-      .ambient-bg {
-        position: absolute;
-        width: 300px;
-        height: 560px;
-        border-radius: 50%;
-        filter: blur(90px);
-        opacity: 0.4;
-        pointer-events: none;
-        transition: background 1.2s ease;
-        z-index: 0;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-
-      /* The slider viewport — only one phone wide, clips everything else */
-      .slider {
-        position: relative;
-        z-index: 1;
-        width: 260px;
-        height: 540px;
-        overflow: hidden;
-        border-radius: 38px;
-      }
-
-      /* The moving track */
-      .slides-track {
-        display: flex;
-        height: 100%;
-        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        will-change: transform;
-      }
-
-      /* Each slide exactly as wide as the viewport */
-      .slide {
-        flex: 0 0 260px;
-        width: 260px;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .phone-frame {
-        width: 100%;
-        height: 100%;
-        border-radius: 36px;
-        background: var(--ink);
-        padding: 10px;
-        box-shadow:
-          0 30px 80px rgba(0, 0, 0, 0.25),
-          0 0 0 1.5px rgba(255, 255, 255, 0.07) inset;
-        position: relative;
-        overflow: hidden;
-      }
-      .phone-frame::before {
-        content: "";
-        position: absolute;
-        top: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.12);
-        border-radius: 10px;
-        z-index: 2;
-      }
-
-      .screen-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 28px;
-        display: block;
-      }
-
-      /* Controls */
-      .slider-controls {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        z-index: 1;
-      }
-      .slider-btn {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        border: 1.5px solid rgba(26, 22, 18, 0.18);
-        background: var(--bg);
-        color: var(--ink);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition:
-          background 0.25s,
-          transform 0.2s;
-      }
-      .slider-btn:hover {
-        background: var(--ink);
-        color: var(--bg);
-        transform: scale(1.08);
-      }
-      .slider-btn svg {
-        width: 18px;
-        height: 18px;
-      }
-      .slider-dots {
-        display: flex;
-        gap: 0.5rem;
-      }
-      .dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--muted);
-        opacity: 0.35;
-        transition:
-          opacity 0.3s,
-          transform 0.3s,
-          background 0.3s;
-        cursor: pointer;
-      }
-      .dot.active {
-        opacity: 1;
-        transform: scale(1.3);
-        background: var(--accent);
-      }
-
-      /* Responsive */
       @media (max-width: 600px) {
         nav {
-          padding: 1.2rem 1.2rem;
+          padding: 1.2rem;
         }
         .nav-links {
           display: none;
@@ -597,6 +738,9 @@
         footer {
           flex-direction: column;
           text-align: center;
+        }
+        .review-card {
+          flex: 0 0 260px;
         }
       }
     </style>
@@ -607,6 +751,7 @@
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
         <li><a href="#screenshots">Screenshots</a></li>
+        <li><a href="#reviews">Reviews</a></li>
         <li><a href="#download">Download</a></li>
       </ul>
     </nav>
@@ -729,14 +874,11 @@
       </div>
     </section>
 
-    <!-- Screenshots -->
     <section class="section screenshots-section" id="screenshots">
       <p class="section-label reveal">App Screenshots</p>
       <h2 class="section-title reveal">See it in action.</h2>
-
       <div class="slider-wrapper reveal">
         <div class="ambient-bg" id="ambientBg"></div>
-
         <div class="slider" id="slider">
           <div class="slides-track" id="slidesTrack">
             <div class="slide">
@@ -785,9 +927,8 @@
             </div>
           </div>
         </div>
-
         <div class="slider-controls">
-          <button class="slider-btn" id="prevBtn" aria-label="Previous">
+          <button class="slider-btn" id="prevBtn">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -798,7 +939,7 @@
             </svg>
           </button>
           <div class="slider-dots" id="sliderDots"></div>
-          <button class="slider-btn" id="nextBtn" aria-label="Next">
+          <button class="slider-btn" id="nextBtn">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -809,6 +950,102 @@
             </svg>
           </button>
         </div>
+      </div>
+    </section>
+
+    <!-- Reviews -->
+    <section class="section reviews-section" id="reviews">
+      <p class="section-label reveal">User Reviews</p>
+      <h2 class="section-title reveal">What people are saying.</h2>
+
+      <div class="review-form-wrapper reveal" id="reviewFormWrapper">
+        <div id="authArea">
+          <p class="auth-prompt">Sign in to leave a review</p>
+          <button class="btn btn-dark" id="signInBtn">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
+            </svg>
+            Sign in with Google
+          </button>
+        </div>
+        <div id="reviewForm" style="display: none">
+          <div class="reviewer-info">
+            <img id="userAvatar" src="" alt="" class="avatar" />
+            <span id="userName"></span>
+            <button class="sign-out-btn" id="signOutBtn">Sign out</button>
+          </div>
+          <div class="star-picker" id="starPicker">
+            <span class="star" data-v="1">★</span>
+            <span class="star" data-v="2">★</span>
+            <span class="star" data-v="3">★</span>
+            <span class="star" data-v="4">★</span>
+            <span class="star" data-v="5">★</span>
+          </div>
+          <textarea
+            id="reviewBody"
+            class="review-textarea"
+            placeholder="Write your review…"
+            maxlength="500"
+          ></textarea>
+          <div class="form-footer">
+            <span id="charCount" class="char-count">0 / 500</span>
+            <button class="btn btn-dark" id="submitReview">
+              Submit Review
+            </button>
+          </div>
+          <p id="formMsg" class="form-msg"></p>
+        </div>
+      </div>
+
+      <div class="reviews-slider-wrapper reveal">
+        <div class="reviews-track-outer" id="reviewsTrackOuter">
+          <div class="reviews-track" id="reviewsTrack"></div>
+        </div>
+        <div
+          class="slider-controls"
+          id="reviewsControls"
+          style="display: none; margin-top: 1.5rem"
+        >
+          <button class="slider-btn" id="reviewsPrev">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <div class="slider-dots" id="reviewsDots"></div>
+          <button class="slider-btn" id="reviewsNext">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+        <p class="no-reviews" id="noReviews" style="display: none">
+          No reviews yet. Be the first!
+        </p>
       </div>
     </section>
 
@@ -846,38 +1083,38 @@
     </footer>
 
     <script>
+      const SUPABASE_URL = "https://pmmkjqmtivepppxshfwk.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_8edHisUrgtiluqEaHUuRjw_NUdIRpWg";
+      const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
       // Nav scroll
       const nav = document.getElementById("nav");
-      window.addEventListener("scroll", () => {
-        nav.classList.toggle("scrolled", window.scrollY > 40);
-      });
+      window.addEventListener("scroll", () =>
+        nav.classList.toggle("scrolled", window.scrollY > 40),
+      );
 
-      // Slider
+      // ── Screenshot slider ──
       (function () {
         const track = document.getElementById("slidesTrack");
         const dotsEl = document.getElementById("sliderDots");
         const ambient = document.getElementById("ambientBg");
         const TOTAL = 4;
         let current = 0;
-
-        // Build dots
         for (let i = 0; i < TOTAL; i++) {
           const d = document.createElement("div");
           d.className = "dot" + (i === 0 ? " active" : "");
           d.addEventListener("click", () => goTo(i));
           dotsEl.appendChild(d);
         }
-
         function goTo(idx) {
           idx = (idx + TOTAL) % TOTAL;
           current = idx;
           track.style.transform = `translateX(-${idx * 260}px)`;
           document
-            .querySelectorAll(".dot")
+            .querySelectorAll("#sliderDots .dot")
             .forEach((d, i) => d.classList.toggle("active", i === idx));
           updateAmbient(idx);
         }
-
         function getAvgColor(img) {
           try {
             const c = document.createElement("canvas");
@@ -900,13 +1137,12 @@
             return "#c0622a";
           }
         }
-
         function updateAmbient(idx) {
           const img = document.getElementById("img" + idx);
           if (!img) return;
-          if (img.complete && img.naturalWidth) {
+          if (img.complete && img.naturalWidth)
             ambient.style.background = getAvgColor(img);
-          } else {
+          else
             img.addEventListener(
               "load",
               () => {
@@ -914,39 +1150,228 @@
               },
               { once: true },
             );
-          }
         }
-
         document
           .getElementById("prevBtn")
           .addEventListener("click", () => goTo(current - 1));
         document
           .getElementById("nextBtn")
           .addEventListener("click", () => goTo(current + 1));
-
-        // Touch swipe
-        let touchX = 0;
+        let tx = 0;
         const slider = document.getElementById("slider");
         slider.addEventListener(
           "touchstart",
           (e) => {
-            touchX = e.touches[0].clientX;
+            tx = e.touches[0].clientX;
           },
           { passive: true },
         );
         slider.addEventListener("touchend", (e) => {
-          const diff = touchX - e.changedTouches[0].clientX;
-          if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
+          const d = tx - e.changedTouches[0].clientX;
+          if (Math.abs(d) > 40) goTo(current + (d > 0 ? 1 : -1));
         });
-
-        // Auto-advance
         let timer = setInterval(() => goTo(current + 1), 4000);
         slider.addEventListener("mouseenter", () => clearInterval(timer));
         slider.addEventListener("mouseleave", () => {
           timer = setInterval(() => goTo(current + 1), 4000);
         });
-
         goTo(0);
+      })();
+
+      // ── Reviews ──
+      (function () {
+        let selectedStars = 0;
+        let reviewsData = [];
+        let reviewsCurrent = 0;
+
+        // Auth state
+        sb.auth.onAuthStateChange((_event, session) => {
+          const user = session?.user;
+          if (user) {
+            document.getElementById("authArea").style.display = "none";
+            document.getElementById("reviewForm").style.display = "block";
+            document.getElementById("userAvatar").src =
+              user.user_metadata?.avatar_url || "";
+            document.getElementById("userName").textContent =
+              user.user_metadata?.full_name || user.email;
+          } else {
+            document.getElementById("authArea").style.display = "block";
+            document.getElementById("reviewForm").style.display = "none";
+          }
+        });
+
+        document.getElementById("signInBtn").addEventListener("click", () => {
+          sb.auth.signInWithOAuth({
+            provider: "google",
+            options: { redirectTo: window.location.href },
+          });
+        });
+
+        document
+          .getElementById("signOutBtn")
+          .addEventListener("click", () => sb.auth.signOut());
+
+        // Star picker
+        const stars = document.querySelectorAll(".star");
+        stars.forEach((s) => {
+          s.addEventListener("click", () => {
+            selectedStars = parseInt(s.dataset.v);
+            stars.forEach((x) =>
+              x.classList.toggle("lit", parseInt(x.dataset.v) <= selectedStars),
+            );
+          });
+          s.addEventListener("mouseover", () => {
+            stars.forEach((x) =>
+              x.classList.toggle(
+                "lit",
+                parseInt(x.dataset.v) <= parseInt(s.dataset.v),
+              ),
+            );
+          });
+          s.addEventListener("mouseout", () => {
+            stars.forEach((x) =>
+              x.classList.toggle("lit", parseInt(x.dataset.v) <= selectedStars),
+            );
+          });
+        });
+
+        // Char count
+        document
+          .getElementById("reviewBody")
+          .addEventListener("input", function () {
+            document.getElementById("charCount").textContent =
+              this.value.length + " / 500";
+          });
+
+        // Submit
+        document
+          .getElementById("submitReview")
+          .addEventListener("click", async () => {
+            const body = document.getElementById("reviewBody").value.trim();
+            const msg = document.getElementById("formMsg");
+            if (!selectedStars) {
+              msg.className = "form-msg err";
+              msg.textContent = "Please select a star rating.";
+              return;
+            }
+            if (!body) {
+              msg.className = "form-msg err";
+              msg.textContent = "Please write something.";
+              return;
+            }
+            const {
+              data: { session },
+            } = await sb.auth.getSession();
+            if (!session) {
+              msg.className = "form-msg err";
+              msg.textContent = "Please sign in first.";
+              return;
+            }
+            const user = session.user;
+            const { error } = await sb.from("reviews").insert({
+              user_name: user.user_metadata?.full_name || user.email,
+              user_avatar: user.user_metadata?.avatar_url || "",
+              user_email: user.email,
+              stars: selectedStars,
+              body: body,
+              approved: false,
+            });
+            if (error) {
+              msg.className = "form-msg err";
+              msg.textContent = "Something went wrong. Try again.";
+              return;
+            }
+            msg.className = "form-msg ok";
+            msg.textContent = "Thank you! Your review is pending approval.";
+            document.getElementById("reviewBody").value = "";
+            document.getElementById("charCount").textContent = "0 / 500";
+            selectedStars = 0;
+            stars.forEach((x) => x.classList.remove("lit"));
+          });
+
+        // Load reviews
+        async function loadReviews() {
+          const { data, error } = await sb
+            .from("reviews")
+            .select("*")
+            .eq("approved", true)
+            .order("created_at", { ascending: false });
+          if (error || !data) return;
+          reviewsData = data;
+          renderReviews();
+        }
+
+        function renderReviews() {
+          const track = document.getElementById("reviewsTrack");
+          const noReviews = document.getElementById("noReviews");
+          const controls = document.getElementById("reviewsControls");
+          const dotsEl = document.getElementById("reviewsDots");
+          track.innerHTML = "";
+          dotsEl.innerHTML = "";
+          if (!reviewsData.length) {
+            noReviews.style.display = "block";
+            return;
+          }
+          noReviews.style.display = "none";
+          reviewsData.forEach((r, i) => {
+            const date = new Date(r.created_at).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            });
+            const stars = "★".repeat(r.stars) + "☆".repeat(5 - r.stars);
+            const card = document.createElement("div");
+            card.className = "review-card";
+            card.innerHTML = `
+            <div class="review-card-top">
+              <img class="review-avatar" src="${r.user_avatar || ""}" onerror="this.style.display='none'" alt="">
+              <div><div class="review-name">${r.user_name}</div><div class="review-date">${date}</div></div>
+            </div>
+            <div class="review-stars">${stars}</div>
+            <div class="review-body">${r.body}</div>`;
+            track.appendChild(card);
+            const d = document.createElement("div");
+            d.className = "dot" + (i === 0 ? " active" : "");
+            d.addEventListener("click", () => reviewsGoTo(i));
+            dotsEl.appendChild(d);
+          });
+          if (reviewsData.length > 1) controls.style.display = "flex";
+          reviewsGoTo(0);
+        }
+
+        function reviewsGoTo(idx) {
+          idx = (idx + reviewsData.length) % reviewsData.length;
+          reviewsCurrent = idx;
+          document.getElementById("reviewsTrack").style.transform =
+            `translateX(-${idx * 316}px)`;
+          document
+            .querySelectorAll("#reviewsDots .dot")
+            .forEach((d, i) => d.classList.toggle("active", i === idx));
+        }
+
+        document
+          .getElementById("reviewsPrev")
+          .addEventListener("click", () => reviewsGoTo(reviewsCurrent - 1));
+        document
+          .getElementById("reviewsNext")
+          .addEventListener("click", () => reviewsGoTo(reviewsCurrent + 1));
+
+        // Touch swipe for reviews
+        let rtx = 0;
+        const ro = document.getElementById("reviewsTrackOuter");
+        ro.addEventListener(
+          "touchstart",
+          (e) => {
+            rtx = e.touches[0].clientX;
+          },
+          { passive: true },
+        );
+        ro.addEventListener("touchend", (e) => {
+          const d = rtx - e.changedTouches[0].clientX;
+          if (Math.abs(d) > 40) reviewsGoTo(reviewsCurrent + (d > 0 ? 1 : -1));
+        });
+
+        loadReviews();
       })();
 
       // Scroll reveal
